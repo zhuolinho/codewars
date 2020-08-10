@@ -38,12 +38,14 @@ isSquare = iter 0
 --   let arr = [read [x] :: Int | x <- show $ fromIntegral n]
 --    in sum [x ^ length arr | x <- arr] == fromIntegral n
 findMissing :: Integral n => [n] -> n
-findMissing xs = let step = div (fromIntegral $ last xs - head xs) $ length xs
-                     a1 = fromIntegral $ head xs
-                     arr = [div ((xs !! (n - 1)) + (xs !! n)) 2
-                           | n <- [0 ..]
-                           , a1 + n * step /= fromIntegral (xs !! n)]
-                 in head arr
+findMissing xs
+  | abs step1 < abs step2 = (xs !! 1) + step1
+  | abs step1 > abs step2 = (xs !! 1) - step2
+  | otherwise = findMissing $ tail xs
+  where
+    step1 = (xs !! 1) - (xs !! 0)
+
+    step2 = (xs !! 2) - (xs !! 1)
 -- data Base = A | T | G | C
 -- type DNA = [Base]
 -- f :: Base -> Base
