@@ -44,3 +44,8 @@ iter n m
 
 isSquare :: Integral n => n -> Bool
 isSquare = iter 0
+
+-- narcissistic :: Integral n => n -> Bool
+-- narcissistic n =
+--   let arr = [read [x] :: Int | x <- show $ fromIntegral n]
+--    in sum [x ^ length arr | x <- arr] == fromIntegral n
