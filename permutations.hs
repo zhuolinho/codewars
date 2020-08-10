@@ -46,6 +46,7 @@ findMissing xs
     step1 = (xs !! 1) - (xs !! 0)
 
     step2 = (xs !! 2) - (xs !! 1)
+
 -- data Base = A | T | G | C
 -- type DNA = [Base]
 -- f :: Base -> Base
@@ -55,3 +56,11 @@ findMissing xs
 -- f C = G
 -- dnaStrand :: DNA -> DNA
 -- dnaStrand xs = map f xs
+evap :: Double -> Double -> Double -> Integer
+evap last last_per_day threshold =
+  if last < threshold
+  then 0
+  else 1 + evap (last * last_per_day) last_per_day threshold
+
+evaporator :: Double -> Double -> Double -> Integer
+evaporator content evap_per_day = evap 100 $ (1 - evap_per_day / 100)
