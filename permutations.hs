@@ -1,5 +1,4 @@
 -- module Likes where
-
 -- likes :: [String] -> String
 -- likes [] = "no one likes this"
 -- likes [x] = x ++ " likes this"
@@ -25,12 +24,23 @@ permutations (x : xs) = unique (append [(insert x t) | t <- (permutations xs)])
 
 -- data Base = A | T | G | C
 -- type DNA = [Base]
-
 -- f :: Base -> Base
 -- f A = T
 -- f T = A
 -- f G = C
 -- f C = G
-
 -- dnaStrand :: DNA -> DNA
 -- dnaStrand xs = map f xs
+
+-- import Data.List (sort)
+-- descendingOrder :: Integer -> Integer
+-- descendingOrder = read . reverse . sort . show
+
+iter :: Integral n => n -> n -> Bool
+iter n m
+  | n * n < m = iter (n + 1) m
+  | n * n > m = False
+  | otherwise = True
+
+isSquare :: Integral n => n -> Bool
+isSquare = iter 0
