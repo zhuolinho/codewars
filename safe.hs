@@ -17,3 +17,13 @@ safeInit [x] = Just []
 safeInit (x:xs) = do
   ms <- safeInit xs
   return (x:ms)
+
+splitWith :: (a -> Bool) -> [a] -> [[a]]
+splitWith func lst =
+  let (m, n) = span func lst
+      x = if null n
+          then []
+          else splitWith func (tail n)
+  in if null m
+     then x
+     else m:x
