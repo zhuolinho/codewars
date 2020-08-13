@@ -27,3 +27,11 @@ splitWith func lst =
   in if null m
      then x
      else m:x
+
+zipWithN func = foldl step []
+  where
+    step xs [] = xs
+    step [] ys = ys
+    step (x:xs) (y:ys) = func x y:step xs ys
+
+abc = zipWithN (++) $ map (map (:[])) ["abc", "defg", "hij"]
