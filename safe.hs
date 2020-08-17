@@ -30,8 +30,26 @@ splitWith func lst =
 
 zipWithN func = foldl step []
   where
-    step xs [] = xs
     step [] ys = ys
     step (x:xs) (y:ys) = func x y:step xs ys
 
-abc = zipWithN (++) $ map (map (:[])) ["abc", "defg", "hij"]
+rever xs = helper [] xs
+  where
+    helper acc [] = acc
+    helper acc (x:xs) = helper (x:acc) xs
+
+myFoldrMap f xs = foldr step [] xs
+  where
+    step x xs = f x:xs
+
+myFoldr step zero (x:xs) = step x (myFoldr step zero xs)
+myFoldr _ zero [] = zero
+
+-- myFoldl :: (a -> b -> a) -> a -> [b] -> a
+myFoldl f = myFoldr step id
+  where
+    step x g = g . (flip f) x
+
+abc = myFoldl step [1 .. 100]
+  where
+    step acc x = x:acc
