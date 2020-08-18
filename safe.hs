@@ -75,3 +75,36 @@ asInt_either ('-':xs) = case asInt_either xs of
   Left msg -> Left msg
   Right q  -> Right (-q)
 asInt_either xs = fold 0 xs
+
+concat' :: [[a]] -> [a]
+concat' = foldr (++) []
+
+takeWhile' f [] = []
+takeWhile' f (x:xs)
+  | f x = x:(takeWhile' f xs)
+  | otherwise = []
+
+takewhile f xs = foldr step [] xs
+  where
+    step x acc
+      | f x = x:acc
+      | otherwise = []
+
+-- groupBy' f [] = []
+-- groupBy' f [x] = [[x]]
+-- groupBy' f (x:xs)
+--   | f x (head (head next)) = (x:head next):tail next
+--   | otherwise = [x]:next
+--   where
+--     next = (groupBy' f xs)
+groupBy' f xs = foldr step [] xs
+  where
+    step x [] = [[x]]
+    step x acc
+      | f x (head (head acc)) = (x:head acc):tail acc
+      | otherwise = [x]:acc
+
+values =
+  [-4.3, -2.4, -1.2, 0.4, 2.3, 5.9, 10.5, 29.1, 5.3, -2.4, -14.5, 2.9, 2.3]
+
+abc = groupBy' (\x y -> (x > 0) == (y > 0)) values
