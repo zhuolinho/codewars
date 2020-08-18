@@ -50,6 +50,28 @@ myFoldl f = myFoldr step id
   where
     step x g = g . (flip f) x
 
-abc = myFoldl step [1 .. 100]
-  where
-    step acc x = x:acc
+type ErrorMessage = String
+
+digitToInt :: Char -> Either ErrorMessage Int
+digitToInt '0' = Right 0
+digitToInt '1' = Right 1
+digitToInt '2' = Right 2
+digitToInt '3' = Right 3
+digitToInt '4' = Right 4
+digitToInt '5' = Right 5
+digitToInt '6' = Right 6
+digitToInt '7' = Right 7
+digitToInt '8' = Right 8
+digitToInt '9' = Right 9
+digitToInt x = Left ("non-digit '" ++ x:"'")
+
+fold acc [] = Right acc
+fold acc (x:xs) = case digitToInt x of
+  Left msg -> Left msg
+  Right q  -> fold (acc * 10 + q) xs
+
+asInt_either :: String -> Either ErrorMessage Int
+asInt_either ('-':xs) = case asInt_either xs of
+  Left msg -> Left msg
+  Right q  -> Right (-q)
+asInt_either xs = fold 0 xs
