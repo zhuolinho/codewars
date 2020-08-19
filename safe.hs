@@ -1,3 +1,5 @@
+import           Data.Char (digitToInt)
+
 safeHead :: [a] -> Maybe a
 safeHead [] = Nothing
 safeHead (x:_) = Just x
@@ -52,21 +54,13 @@ myFoldl f = myFoldr step id
 
 type ErrorMessage = String
 
-digitToInt :: Char -> Either ErrorMessage Int
-digitToInt '0' = Right 0
-digitToInt '1' = Right 1
-digitToInt '2' = Right 2
-digitToInt '3' = Right 3
-digitToInt '4' = Right 4
-digitToInt '5' = Right 5
-digitToInt '6' = Right 6
-digitToInt '7' = Right 7
-digitToInt '8' = Right 8
-digitToInt '9' = Right 9
-digitToInt x = Left ("non-digit '" ++ x:"'")
+digitToInt' :: Char -> Either ErrorMessage Int
+digitToInt' x
+  | elem x ['0' .. '9'] = Right (digitToInt x)
+  | otherwise = Left ("non-digit '" ++ x:"'")
 
 fold acc [] = Right acc
-fold acc (x:xs) = case digitToInt x of
+fold acc (x:xs) = case digitToInt' x of
   Left msg -> Left msg
   Right q  -> fold (acc * 10 + q) xs
 
@@ -100,8 +94,8 @@ takewhile f xs = foldr step [] xs
 groupBy' f xs = foldr step [] xs
   where
     step x [] = [[x]]
-    step x acc
-      | f x (head (head acc)) = (x:head acc):tail acc
+    step x acc@(h@(hh:_):t)
+      | f x hh = (x:h):t
       | otherwise = [x]:acc
 
 values =
@@ -115,10 +109,9 @@ cycle' xs = foldr (:) (cycle' xs) xs
 
 words' xs = let result = foldr step [[]] xs
                   where
-                    step ' ' acc
-                      | head acc == "" = acc
-                      | otherwise = []:acc
-                    step x acc = (x:head acc):tail acc
+                    step ' ' acc@("":_) = acc
+                    step ' ' acc = []:acc
+                    step x (h:t) = (x:h):t
             in if head result == ""
                then tail result
                else result
@@ -127,4 +120,4 @@ unlines' xs = foldr step "" xs
   where
     step x acc = x ++ '\n':acc
 
-abc = unlines (words' " 12 232423    21353515 ")
+abc = groupBy' (\x y -> x * y > 0) values
