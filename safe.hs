@@ -107,4 +107,24 @@ groupBy' f xs = foldr step [] xs
 values =
   [-4.3, -2.4, -1.2, 0.4, 2.3, 5.9, 10.5, 29.1, 5.3, -2.4, -14.5, 2.9, 2.3]
 
-abc = groupBy' (\x y -> (x > 0) == (y > 0)) values
+any' f xs = foldr step False xs
+  where
+    step x acc = (f x) || acc
+
+cycle' xs = foldr (:) (cycle' xs) xs
+
+words' xs = let result = foldr step [[]] xs
+                  where
+                    step ' ' acc
+                      | head acc == "" = acc
+                      | otherwise = []:acc
+                    step x acc = (x:head acc):tail acc
+            in if head result == ""
+               then tail result
+               else result
+
+unlines' xs = foldr step "" xs
+  where
+    step x acc = x ++ '\n':acc
+
+abc = unlines (words' " 12 232423    21353515 ")
