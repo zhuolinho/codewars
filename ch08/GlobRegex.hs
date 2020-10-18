@@ -3,22 +3,40 @@ module GlobRegex (globToRegex, matchesGlob) where
 
 import           Text.Regex.Posix ((=~))
 
-globToRegex :: String -> String
-globToRegex cs = '^':globToRegex' cs ++ "$"
+type GlobError = String
 
-globToRegex' :: String -> String
-globToRegex' "" = ""
-globToRegex' ('*':cs) = ".*" ++ globToRegex' cs
-globToRegex' ('?':cs) = '.':globToRegex' cs
-globToRegex' ('[':'!':c:cs) = "[^" ++ c:charClass cs
-globToRegex' ('[':c:cs) = '[':c:charClass cs
-globToRegex' ('[':_) = error "unterminated character class"
-globToRegex' (c:cs) = escape c ++ globToRegex' cs
+globToRegex :: String -> Either GlobError String
+globToRegex cs = case globToRegex' cs of
+  Left err     -> Left err
+  Right result -> Right ('^':result ++ "$")
 
-charClass :: String -> String
-charClass (']':cs) = ']':globToRegex' cs
-charClass (c:cs) = c:charClass cs
-charClass [] = error "unterminated character class"
+globToRegex' :: String -> Either GlobError String
+globToRegex' "" = Right ""
+globToRegex' ('*':cs) = case globToRegex' cs of
+  Left err     -> Left err
+  Right result -> Right (".*" ++ result)
+globToRegex' ('?':cs) = case globToRegex' cs of
+  Left err     -> Left err
+  Right result -> Right ('.':result)
+globToRegex' ('[':'!':c:cs) = case charClass cs of
+  Left err     -> Left err
+  Right result -> Right ("[^" ++ c:result)
+globToRegex' ('[':c:cs) = case charClass cs of
+  Left err     -> Left err
+  Right result -> Right ('[':c:result)
+globToRegex' ('[':_) = Left "unterminated character class"
+globToRegex' (c:cs) = case globToRegex' cs of
+  Left err     -> Left err
+  Right result -> Right (escape c ++ result)
+
+charClass :: String -> Either GlobError String
+charClass (']':cs) = case globToRegex' cs of
+  Left err     -> Left err
+  Right result -> Right (']':result)
+charClass (c:cs) = case charClass cs of
+  Left err     -> Left err
+  Right result -> Right (c:result)
+charClass [] = Left "unterminated character class"
 
 escape :: Char -> String
 escape c
@@ -28,4 +46,8 @@ escape c
     regexChars = "\\+()^$.{}]|"
 
 matchesGlob :: FilePath -> String -> Bool
-name `matchesGlob` pat = name =~ globToRegex pat
+name `matchesGlob` pat = case globToRegex pat of
+  Left _       -> False
+  Right result -> name =~ result
+
+abc = globToRegex "[]"

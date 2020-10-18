@@ -79,12 +79,6 @@ data ParseState =
              }
   deriving (Show)
 
-simpleParse :: ParseState -> (a, ParseState)
-simpleParse = undefined
-
-betterParse :: ParseState -> Either String (a, ParseState)
-betterParse = undefined
-
 newtype Parse a =
   Parse { runParse :: ParseState -> Either String (a, ParseState) }
 
@@ -123,3 +117,6 @@ firstParser ==> secondParser = Parse chainedParser
 bail :: String -> Parse a
 bail err = Parse
   $ \s -> Left $ "byte offset " ++ show (offset s) ++ ": " ++ err
+
+abc = runParse (parseByte ==> \_ -> parseByte ==> \_ -> parseByte)
+  $ ParseState (L8.pack "ab") 0
