@@ -1,9 +1,10 @@
 module Glob (namesMatching) where
 
 import           System.Directory (doesDirectoryExist, doesFileExist
-                                 , getCurrentDirectory, getDirectoryContents)
+                                 , getCurrentDirectory, getDirectoryContents
+                                 , renameDirectory, renameFile)
 import           System.FilePath (dropTrailingPathSeparator, splitFileName
-                                , (</>))
+                                , replaceExtension, (</>))
 import           Control.Exception (handle, SomeException)
 import           Control.Monad (forM)
 import           GlobRegex (matchesGlob)
@@ -68,3 +69,20 @@ listPlain dirName baseName = do
     (if exists
      then [baseName]
      else [])
+
+renameWith :: (FilePath -> FilePath) -> FilePath -> IO FilePath
+renameWith f path = do
+  let path' = f path
+  rename path path'
+  return path'
+
+rename :: FilePath -> FilePath -> IO ()
+rename old new = do
+  isFile <- doesFileExist old
+  let f = if isFile
+          then renameFile
+          else renameDirectory
+  f old new
+
+cc2cpp = mapM (renameWith (flip replaceExtension ".cpp"))
+  =<< namesMatching "*.cc"
