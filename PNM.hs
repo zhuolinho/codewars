@@ -159,12 +159,12 @@ parseBytes p = parseCount p
                 then bail "no more input"
                 else identity (L8.pack words)
 
-parseCount :: (Eq t, Num t) => t -> Parse [Char]
-parseCount 0 = identity []
-parseCount p = peekByte
-  ==> \mp -> if mp == Nothing
-             then identity []
-             else parseChar ==> \b -> (b:) <$> parseCount (p - 1)
+parseCount p
+  | p > 0 = peekByte
+    ==> \mp -> if mp == Nothing
+               then identity []
+               else parseChar ==> \b -> (b:) <$> parseCount (p - 1)
+  | otherwise = identity []
 
 abc = parse (parseBytes 5) (L8.pack "12oo")
 
