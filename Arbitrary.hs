@@ -1,5 +1,5 @@
 import           Test.QuickCheck.Arbitrary
-import           Test.QuickCheck.Gen
+import           Test.QuickCheck
 import           Control.Monad
 
 data Doc = Empty
@@ -28,3 +28,37 @@ instance Arbitrary Doc where
     , return Line
     , liftM2 Concat arbitrary arbitrary
     , liftM2 Union arbitrary arbitrary]
+
+empty :: Doc
+empty = Empty
+
+char :: Char -> Doc
+char c = Char c
+
+text :: String -> Doc
+text "" = Empty
+text s = Text s
+
+double :: Double -> Doc
+double d = text (show d)
+
+line :: Doc
+line = Line
+
+(<>) :: Doc -> Doc -> Doc
+Empty <> y = y
+x <> Empty = x
+x <> y = x `Concat` y
+
+prop_empty_id x = empty Main.<> x == x && x Main.<> empty == x
+
+prop_char c = char c == Char c
+
+prop_text s = text s
+  == if null s
+     then Empty
+     else Text s
+
+prop_line = line == Line
+
+prop_double d = double d == text (show d)
