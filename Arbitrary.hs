@@ -1,8 +1,6 @@
--- import           Test.QuickCheck.Arbitrary
+import           Test.QuickCheck.Arbitrary
 import           Test.QuickCheck.Gen
-
-class Arbitrary a where
-  arbitrary :: Gen a
+import           Control.Monad
 
 data Doc = Empty
          | Char Char
@@ -20,8 +18,13 @@ data Ternary = Yes
 instance Arbitrary Ternary where
   arbitrary = elements [Yes, No, Unknown]
 
-instance (Arbitrary a, Arbitrary b) => Arbitrary (a, b) where
-  arbitrary = do
-    x <- arbitrary
-    y <- arbitrary
-    return (x, y)
+abc = sample' (arbitrary :: Gen Ternary)
+
+instance Arbitrary Doc where
+  arbitrary = oneof
+    [ return Empty
+    , liftM Char arbitrary
+    , liftM Text arbitrary
+    , return Line
+    , liftM2 Concat arbitrary arbitrary
+    , liftM2 Union arbitrary arbitrary]
