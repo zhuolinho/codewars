@@ -3,8 +3,7 @@ module Main where
 
 import           Arbitrary (prop_empty_id, prop_char, prop_text, prop_line
                           , prop_double, prop_hcat, prop_punctuate')
-import           Test.QuickCheck (quickCheckWithResult
-                                , Args(Args, replay, maxSuccess, maxDiscardRatio, maxSize, chatty))
+import           Test.QuickCheck (quickCheckWithResult, Args(..))
 
 anal :: Args
 anal = Args { replay = Nothing
@@ -12,6 +11,7 @@ anal = Args { replay = Nothing
             , maxDiscardRatio = 1
             , maxSize = 1000
             , chatty = True
+            , maxShrinks = 0
             }
 
 minimal :: Args
@@ -20,6 +20,7 @@ minimal = Args { replay = Nothing
                , maxDiscardRatio = 1
                , maxSize = 200
                , chatty = True
+               , maxShrinks = 0
                }
 
 runTests :: Args -> IO ()
