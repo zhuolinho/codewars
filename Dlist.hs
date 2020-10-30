@@ -36,3 +36,9 @@ dmap f = dfoldr go empty
 
 instance Functor DList where
   fmap = dmap
+
+instance Semigroup (DList a) where
+  (<>) = append
+
+instance Monoid (DList a) where
+  mempty = empty
