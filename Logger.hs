@@ -14,12 +14,12 @@ record :: String -> Logger ()
 record s = Logger ((), [s])
 
 instance Functor Logger where
-  fmap = undefined
+  fmap = liftM
 
 instance Applicative Logger where
-  pure = undefined
+  pure = return
 
-  (<*>) = undefined
+  (<*>) = liftM . fst . execLogger
 
 instance Monad Logger where
   return a = Logger (a, [])
@@ -29,8 +29,7 @@ instance Monad Logger where
                 (b, x) = execLogger n
             in Logger (b, w ++ x)
 
-instance MonadFail Logger where
-  fail = undefined
+fail err = Logger ("undefined", [err])
 
 globToRegex cs = globToRegex' cs >>= \ds -> return ('^':ds)
 
@@ -47,7 +46,7 @@ globToRegex' ('[':'!':c:cs) = record "character class, negative"
   >>= \ds -> return ("[^" ++ c:ds)
 globToRegex' ('[':c:cs) = record "character class" >> charClass cs
   >>= \ds -> return ("[" ++ c:ds)
-globToRegex' ('[':_) = fail "unterminated character class"
+globToRegex' ('[':_) = Logger.fail "unterminated character class"
 globToRegex' (c:cs) = liftM2 (++) (escape c) (globToRegex' cs)
 
 escape :: Char -> Logger String
@@ -59,4 +58,5 @@ escape c
 
 charClass (']':cs) = (']':) `liftM` globToRegex' cs
 charClass (c:cs) = (c:) `liftM` charClass cs
+charClass _ = Logger.fail "charClass"
 
