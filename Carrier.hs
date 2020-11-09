@@ -37,3 +37,48 @@ variation2a person phoneMap carrierMap addressMap = do
   number <- M.lookup person phoneMap
   carrier <- M.lookup number carrierMap
   M.lookup carrier addressMap
+
+monadic xs ys = do
+  x <- xs
+  y <- ys
+  return (x, y)
+
+comprehensive xs ys = [(x, y) | x <- xs, y <- ys]
+
+blockyPlain xs ys = xs >>= \x -> ys >>= \y -> return (x, y)
+
+blockyPlain_reloaded xs ys = concat
+  (map (\x -> concat (map (\y -> return (x, y)) ys)) xs)
+
+guarded True xs = xs
+guarded False _ = []
+
+multiplyTo :: Int -> [(Int, Int)]
+multiplyTo n = do
+  x <- [1 .. n]
+  y <- [x .. n]
+  guarded (x * y == n) $ return (x, y)
+
+robust xs = do
+  (_:x:_) <- Just xs
+  return x
+
+wordCount = print . length . words =<< getContents
+
+type SimpleState s a = s -> (a, s)
+
+returnSt :: a -> SimpleState s a
+returnSt a = \s -> (a, s)
+
+returnAlt :: a -> SimpleState s a
+returnAlt a s = (a, s)
+
+bindSt :: (SimpleState s a) -> (a -> SimpleState s b) -> SimpleState s b
+bindSt m k = \s -> let (a, s') = m s
+                   in (k a) s'
+
+bindAlt step makeStep oldState = let (result, newState) = step oldState
+                                 in (makeStep result) newState
+
+getSt :: SimpleState s s
+getSt = \s -> (s, s)
