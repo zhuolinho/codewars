@@ -1,7 +1,9 @@
 -- file: ch14/Carrier.hs
 import qualified Data.Map as M
-import           System.Random (Random(random), RandomGen, StdGen)
-import           Control.Monad.State (MonadState(put, get), liftM2, State)
+import           System.Random (getStdGen, setStdGen, Random(random), RandomGen
+                              , StdGen)
+import           Control.Monad.State (MonadState(put, get), liftM, liftM2
+                                    , modify, runState, State)
 
 type PersonName = String
 
@@ -102,3 +104,39 @@ getRandom = get
 
 getTwoRandoms :: Random a => RandomState (a, a)
 getTwoRandoms = liftM2 (,) getRandom getRandom
+
+getRandom' :: Random a => RandomState a
+getRandom' = do
+  gen <- get
+  let (val, gen') = random gen
+  put gen'
+  return val
+
+runTwoRandoms :: IO (Int, Int)
+runTwoRandoms = do
+  oldState <- getStdGen
+  let (result, newState) = runState getTwoRandoms oldState
+  setStdGen newState
+  return result
+
+data CountedRandom = CountedRandom { crGen :: StdGen, crCount :: Int }
+
+type CRState = State CountedRandom
+
+getCountedRandom :: Random a => CRState a
+getCountedRandom = do
+  st <- get
+  let (val, gen') = random (crGen st)
+  put CountedRandom { crGen = gen', crCount = crCount st + 1 }
+  return val
+
+getCount :: CRState Int
+getCount = crCount `liftM` get
+
+putCount :: Int -> CRState ()
+putCount a = do
+  st <- get
+  put st { crCount = a }
+
+putCountModify :: Int -> CRState ()
+putCountModify a = modify $ \st -> st { crCount = a }
