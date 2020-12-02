@@ -84,3 +84,9 @@ lookupM _ [] = mzero
 lookupM k ((x, y):xys)
   | x == k = return y `mplus` lookupM k xys
   | otherwise = lookupM k xys
+
+guard :: (MonadPlus m) => Bool -> m ()
+guard True = return ()
+guard False = mzero
+
+x `zeroMod` n = guard ((x `mod` n) == 0) >> return x
