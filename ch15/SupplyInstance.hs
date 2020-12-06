@@ -1,3 +1,8 @@
+{-# LANGUAGE FlexibleInstances
+             , MultiParamTypeClasses, GeneralizedNewtypeDeriving #-}
+
+import           SupplyClass
+
 newtype Reader e a = R { runReader :: e -> a }
 
 instance Monad (Reader e) where
@@ -16,4 +21,15 @@ instance Applicative (Reader e) where
 ask :: Reader e e
 ask = R id
 
-abc = runReader (ask >>= \x -> return (x * 3)) 2
+-- abc = runReader (ask >>= \x -> return (x * 3)) 2
+newtype MySupply e a = MySupply { runMySupply :: Reader e a }
+  deriving (Functor, Applicative, Monad)
+
+instance MonadSupply e (MySupply e) where
+  next = MySupply
+    $ do
+      v <- ask
+      return (Just v)
+
+runMS :: MySupply i a -> i -> a
+runMS = runReader . runMySupply
