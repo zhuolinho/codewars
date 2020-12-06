@@ -33,3 +33,9 @@ instance MonadSupply e (MySupply e) where
 
 runMS :: MySupply i a -> i -> a
 runMS = runReader . runMySupply
+
+xy :: (Num s, MonadSupply s m, MonadFail m) => m s
+xy = do
+  Just x <- next
+  Just y <- next
+  return (x * y)
