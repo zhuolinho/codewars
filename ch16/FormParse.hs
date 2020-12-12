@@ -1,5 +1,8 @@
-import           Text.ParserCombinators.Parsec
-import           Numeric
+import           Text.ParserCombinators.Parsec (char, hexDigit, oneOf, many1
+                                              , optionMaybe, sepBy, (<|>), many
+                                              , CharParser)
+import           Numeric (readHex)
+import           Control.Monad (liftM2)
 
 p_query :: CharParser () [(String, Maybe String)]
 p_query = p_pair `sepBy` char '&'
@@ -22,3 +25,5 @@ p_hex = do
   b <- hexDigit
   let ((d, _):_) = readHex [a, b]
   return . toEnum $ d
+
+p_pair_app1 = liftM2 (,) (many1 p_char) (optionMaybe (char '=' >> many p_char))
